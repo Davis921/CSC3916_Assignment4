@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 mongoose.connect(process.env.DB);
 
 // Movie schema
-const reviewSchema = new mongoose.Schema({
+const ReviewSchema = new mongoose.Schema({
     movieId: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie' },
     username: String,
     review: String,
