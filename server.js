@@ -208,6 +208,37 @@ router.post('/reviews', authJwtController.isAuthenticated, async (req, res) => {
     }
 });
 
+/*
+// Post a review (without analytics tracking)
+router.post('webapihw3/reviews', authJwtController.isAuthenticated, async (req, res) => {
+    const { movieId, review, rating } = req.body;
+
+    if (!movieId || !review || rating == null) {
+        return res.status(400).json({ success: false, message: 'Missing required fields.' });
+    }
+
+    try {
+        const movie = await Movie.findById(movieId);
+        if (!movie) {
+            return res.status(404).json({ success: false, message: 'Movie not found.' });
+        }
+
+        const newReview = new Review({
+            movieId,
+            username: req.user.username,
+            review,
+            rating
+        });
+
+        await newReview.save();
+
+        res.status(201).json({ message: 'Review created!' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Error saving review.', error: err.message });
+    }
+});
+*/
+
 router.delete('/reviews/:id', authJwtController.isAuthenticated, async (req, res) => {
     try {
         const deleted = await Review.findByIdAndDelete(req.params.id);
