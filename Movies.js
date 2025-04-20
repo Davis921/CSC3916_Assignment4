@@ -11,6 +11,7 @@ const MovieSchema = new mongoose.Schema({
       min: [1900, 'Must be greater than 1899'], 
       max: [2100, 'Must be less than 2100'] 
     },
+    imageUrl: String,
     genre: {
       type: String,
       enum: ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Thriller', 'Western', 'Science Fiction'],
