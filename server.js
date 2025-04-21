@@ -98,18 +98,26 @@ router.route('/movies')
   .get(authJwtController.isAuthenticated, async (req, res) => {
     const includeReviews = req.query.reviews === 'true';
     try {
-      if (includeReviews) {
-        const moviesWithReviews = await Movie.aggregate([
-          {
-            $lookup: {
-              from: 'reviews',
-              localField: '_id',
-              foreignField: 'movieId',
-              as: 'reviews'
-            }
-          }
-        ]);
-        return res.status(200).json(moviesWithReviews);
+        if (includeReviews) {
+            const moviesWithAvgRatings = await Movie.aggregate([
+              {
+                $lookup: {
+                  from: 'reviews',
+                  localField: '_id',
+                  foreignField: 'movieId',
+                  as: 'reviews'
+                }
+              },
+              {
+                $addFields: {
+                  avgRating: { $avg: '$reviews.rating' }
+                }
+              },
+              {
+                $sort: { avgRating: -1 }
+              }
+            ]);
+            return res.status(200).json(moviesWithAvgRatings);
       } else {
         const movies = await Movie.find();
         return res.status(200).json(movies);
