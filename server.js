@@ -100,23 +100,25 @@ router.route('/movies')
     try {
         if (includeReviews) {
             const moviesWithAvgRatings = await Movie.aggregate([
-              {
-                $lookup: {
-                  from: 'reviews',
-                  localField: '_id',
-                  foreignField: 'movieId',
-                  as: 'reviews'
+                {
+                  $lookup: {
+                    from: 'reviews',
+                    localField: '_id',
+                    foreignField: 'movieId',
+                    as: 'reviews'
+                  }
+                },
+                {
+                  $addFields: {
+                    avgRating: {
+                      $round: [{ $avg: '$reviews.rating' }, 1]
+                    }
+                  }
+                },
+                {
+                  $sort: { avgRating: -1 }
                 }
-              },
-              {
-                $addFields: {
-                  avgRating: { $avg: '$reviews.rating' }
-                }
-              },
-              {
-                $sort: { avgRating: -1 }
-              }
-            ]);
+              ]);              
             return res.status(200).json(moviesWithAvgRatings);
       } else {
         const movies = await Movie.find();
@@ -175,6 +177,39 @@ router.route('/movies/:title')
           res.status(500).json({ success: false, message: 'Error deleting movie.' });
       }
   });
+router.get('/movie/:id', authJwtController.isAuthenticated, async (req, res) => {
+    const movieId = req.params.id;
+
+    try {
+        const movieDetail = await Movie.aggregate([
+            {
+                $match: { _id: require('mongoose').Types.ObjectId(movieId) }
+            },
+            {
+                $lookup: {
+                    from: 'reviews',
+                    localField: '_id',
+                    foreignField: 'movieId',
+                    as: 'movieReviews'
+                }
+            },
+            {
+                $addFields: {
+                    avgRating: { $avg: '$movieReviews.rating' }
+                }
+            }
+        ]);
+
+        if (!movieDetail || movieDetail.length === 0) {
+            return res.status(404).json({ success: false, message: 'Movie not found' });
+        }
+
+        res.status(200).json({ success: true, movie: movieDetail[0] });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Error fetching movie details.', error: err.message });
+    }
+});
 
 // Get all reviews
 router.get('/reviews', async (req, res) => {
