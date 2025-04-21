@@ -140,36 +140,7 @@ router.route('/movies')
     }
 });
 
-router.get('/movies/:id/details', authJwtController.isAuthenticated, async (req, res) => {
-    try {
-        const movieId = new mongoose.Types.ObjectId(req.params.id);
 
-        const result = await Movie.aggregate([
-            { $match: { _id: movieId } },
-            {
-                $lookup: {
-                    from: 'reviews',
-                    localField: '_id',
-                    foreignField: 'movieId',
-                    as: 'movieReviews'
-                }
-            },
-            {
-                $addFields: {
-                    avgRating: { $avg: '$movieReviews.rating' }
-                }
-            }
-        ]);
-
-        if (!result || result.length === 0) {
-            return res.status(404).json({ success: false, msg: 'Movie not found.' });
-        }
-
-        res.status(200).json({ success: true, movie: result[0] });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Error retrieving movie detail.', error: err.message });
-    }
-});
 
 router.route('/movies/:title')
   .get(authJwtController.isAuthenticated, async (req, res) => {
