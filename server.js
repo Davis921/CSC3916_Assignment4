@@ -140,7 +140,7 @@ router.route('/movies')
     }
 });
 
-router.get('/movies/:id/details', authJwtController.isAuthenticated, async (req, res) => {
+router.get('/movies/:id', authJwtController.isAuthenticated, async (req, res) => {
     try {
         const movieId = new mongoose.Types.ObjectId(req.params.id);
 
